@@ -25,10 +25,6 @@ uv pip install -r requirements.txt
 
 ## Usage
 
-Run the main predictor with MLflow tracking:
-```bash
-uv run src/main.py
-```
 
 Test the core functionality without MLflow dependencies:
 ```bash
