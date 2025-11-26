@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  stock-predictor-ui:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+      - /app/__pycache__
+    environment:
+      - PYTHONPATH=/app/src
+    restart: unless-stopped

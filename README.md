@@ -23,6 +23,7 @@ uv pip install -r requirements.txt
 
 ## Usage
 
+### Local Development
 Compare multiple models:
 ```bash
 uv run src/test_predictor.py
@@ -32,6 +33,19 @@ Get simple model accuracy percentage (Random Forest):
 ```bash
 uv run src/get_accuracy.py
 ```
+
+Run web UI:
+```bash
+uv run streamlit run src/ui.py
+```
+
+### Docker
+Build and run with Docker Compose:
+```bash
+docker-compose up --build
+```
+
+Then open http://localhost:8501 in your browser.
 
 ## Expected Output
 
