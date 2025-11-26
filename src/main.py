@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import mlflow
 import mlflow.sklearn
 
@@ -68,7 +68,16 @@ def main():
     # Evaluate
     y_pred = model.predict(X_test)
     mse = mean_squared_error(y_test, y_pred)
-    print(f"Mean Squared Error: {mse}")
+    rmse = np.sqrt(mse)
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+    accuracy_percentage = r2 * 100
+    
+    print(f"Mean Squared Error: {mse:.6f}")
+    print(f"Root Mean Squared Error: {rmse:.6f}")
+    print(f"Mean Absolute Error: {mae:.6f}")
+    print(f"R-squared Score: {r2:.6f}")
+    print(f"Model Accuracy: {accuracy_percentage:.2f}%")
 
     # MLflow logging
     mlflow.set_experiment("Stock Prediction")
@@ -76,6 +85,10 @@ def main():
         mlflow.log_param("ticker", ticker)
         mlflow.log_param("model", "RandomForest")
         mlflow.log_metric("mse", mse)
+        mlflow.log_metric("rmse", rmse)
+        mlflow.log_metric("mae", mae)
+        mlflow.log_metric("r2_score", r2)
+        mlflow.log_metric("accuracy_percentage", accuracy_percentage)
         mlflow.sklearn.log_model(model, "model")
 
     print("Model saved with MLflow.")
