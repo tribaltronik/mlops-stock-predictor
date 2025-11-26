@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.svm import SVR
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
 
@@ -48,11 +51,21 @@ def preprocess_data(data):
     return X, y
 
 
-def train_model(X_train, y_train):
+def train_model(X_train, y_train, model_type="random_forest"):
     """
-    Train a Random Forest model.
+    Train a model based on type.
     """
-    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    if model_type == "random_forest":
+        model = RandomForestRegressor(n_estimators=100, random_state=42)
+    elif model_type == "linear_regression":
+        model = LinearRegression()
+    elif model_type == "svr":
+        model = SVR(kernel="rbf")
+    elif model_type == "gradient_boosting":
+        model = GradientBoostingRegressor(n_estimators=100, random_state=42)
+    else:
+        raise ValueError(f"Unknown model type: {model_type}")
+
     model.fit(X_train, y_train)
     return model
 
@@ -94,7 +107,7 @@ def return_model_accuracy():
     """
     Main function to return model accuracy metrics.
     """
-    ticker = "AAPL"
+    ticker = "JEDI.DE"
     start_date = "2020-01-01"
     end_date = "2024-01-01"
 
@@ -154,7 +167,7 @@ def get_model_accuracy():
     Simple function to return just the model accuracy percentage.
     This is the main function to call for getting model accuracy.
     """
-    ticker = "AAPL"
+    ticker = "JEDI.DE"
     start_date = "2020-01-01"
     end_date = "2024-01-01"
 
@@ -185,12 +198,68 @@ def get_model_accuracy():
         return None
 
 
+def compare_models():
+    """
+    Compare multiple models on the same data.
+    """
+    ticker = "JEDI.DE"
+    start_date = "2020-01-01"
+    end_date = "2024-01-01"
+
+    models = ["random_forest", "linear_regression", "svr", "gradient_boosting"]
+    results = {}
+
+    print(f"Fetching data for {ticker} from {start_date} to {end_date}")
+
+    # Fetch data once
+    data = fetch_stock_data(ticker, start_date, end_date)
+    if data.empty:
+        print("No data fetched.")
+        return None
+
+    # Preprocess once
+    X, y = preprocess_data(data)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    print(f"Data shape: {data.shape}")
+    print(f"Training set: {X_train.shape[0]} samples")
+    print("\n" + "=" * 60)
+    print("MODEL COMPARISON")
+    print("=" * 60)
+
+    for model_type in models:
+        print(f"\nTesting {model_type.replace('_', ' ').title()}...")
+        try:
+            model = train_model(X_train, y_train, model_type)
+            accuracy_metrics = evaluate_model_accuracy(model, X_test, y_test)
+            results[model_type] = accuracy_metrics
+            print(f"  Accuracy: {accuracy_metrics['accuracy_percentage']:.2f}%")
+            print(f"  R² Score: {accuracy_metrics['r2_score']:.4f}")
+            print(f"  RMSE: {accuracy_metrics['rmse']:.4f}")
+        except Exception as e:
+            print(f"  Error: {e}")
+
+    # Summary
+    print("\n" + "=" * 60)
+    print("SUMMARY")
+    print("=" * 60)
+    for model, metrics in results.items():
+        print(
+            f"{model.replace('_', ' ').title()}: {metrics['accuracy_percentage']:.2f}%"
+        )
+
+    return results
+
+
 def main():
-    accuracy = get_model_accuracy()
-    if accuracy is not None:
-        print(f"Model Accuracy: {accuracy:.2f}%")
+    # Run comparison
+    results = compare_models()
+    if results:
+        print("\nModel comparison completed!")
     else:
-        print("Unable to calculate model accuracy")
+        print("Unable to perform model comparison")
 
 
 if __name__ == "__main__":
